@@ -1,0 +1,141 @@
+# Web Craft Project - Development Rules
+
+## 项目概述
+
+Web Craft 是一个智能网页爬虫管理系统的前端界面。
+
+## 技术栈
+
+### 前端 (web_craft_ui/)
+
+**核心框架:**
+- **React 18** - UI 框架
+- **TypeScript** - 类型安全的 JavaScript 超集
+- **Vite 5** - 快速的构建工具和开发服务器
+
+**状态管理:**
+- **Zustand** - 轻量级状态管理库 (~1KB)
+
+**开发工具:**
+- **ESLint** - JavaScript/TypeScript 代码检查
+- **@typescript-eslint** - TypeScript ESLint 插件
+- **@vitejs/plugin-react** - Vite React 插件
+
+**样式:**
+- **CSS3** - 原生 CSS，支持深色模式
+- **CSS Modules** - 组件级样式隔离
+
+## 项目结构
+
+### 前端结构 (web_craft_ui/)
+```
+web_craft_ui/
+├── src/
+│   ├── components/       # React 组件
+│   │   ├── SpiderList.tsx
+│   │   └── SpiderList.css
+│   ├── services/         # API 服务层
+│   │   └── api.ts
+│   ├── store/           # Zustand 状态管理
+│   │   ├── useSpiderStore.ts
+│   │   └── index.ts
+│   ├── types/           # TypeScript 类型定义
+│   │   └── api.ts
+│   ├── App.tsx          # 主应用组件
+│   ├── App.css          # 应用样式
+│   ├── main.tsx         # 应用入口
+│   └── index.css        # 全局样式
+├── index.html           # HTML 模板
+├── vite.config.ts       # Vite 配置
+├── tsconfig.json        # TypeScript 配置
+└── package.json         # 依赖管理
+```
+
+## 开发规范
+
+### 前端开发规范
+
+1. **代码风格:**
+   - 使用 TypeScript 严格模式
+   - 组件使用函数式组件 + Hooks
+   - 遵循 React 最佳实践
+
+2. **状态管理:**
+   - 使用 Zustand 管理全局状态
+   - 本地状态使用 useState
+   - 副作用使用 useEffect
+
+3. **类型安全:**
+   - 所有 API 响应定义 TypeScript 类型
+   - 避免使用 `any` 类型
+   - 使用接口定义组件 Props
+
+4. **样式规范:**
+   - 组件样式独立文件 (.css)
+   - 使用语义化的 CSS 类名
+   - 支持深色模式 (@media prefers-color-scheme)
+
+5. **API 集成:**
+   - 统一在 `services/api.ts` 中定义 API 调用
+   - 使用 async/await 处理异步请求
+   - 统一的错误处理机制
+
+## API 端点
+
+### 后端 API (http://0.0.0.0:8080/api/v1)
+
+- `GET /health` - 健康检查
+- `GET /spiders` - 获取爬虫列表
+- `POST /crawl/single` - 执行单个爬虫任务
+
+### API 响应格式
+```typescript
+{
+  success: boolean
+  message: string
+  data: any
+  error_code: string | null
+  timestamp: string
+}
+```
+
+## 配置管理
+
+### 前端配置
+- API Base URL: `http://0.0.0.0:8080/api/v1`
+- 开发服务器端口: 3000
+
+## 启动命令
+
+### 前端
+```bash
+# 安装依赖
+npm install
+
+# 启动开发服务器
+npm run dev
+
+# 构建生产版本
+npm run build
+```
+
+## 测试
+
+### 前端测试
+```bash
+# 代码检查
+npm run lint
+```
+
+## 依赖版本
+
+### 前端主要依赖
+- react: ^18.2.0
+- typescript: ^5.2.2
+- vite: ^5.0.8
+- zustand: latest
+
+## 后端 API 文档
+
+- **Swagger UI**: http://127.0.0.1:8080/docs
+- **ReDoc**: http://127.0.0.1:8080/redoc

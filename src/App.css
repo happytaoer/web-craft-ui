@@ -1,0 +1,168 @@
+.app {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 2rem;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.app-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  padding-bottom: 2rem;
+  border-bottom: 2px solid #e0e0e0;
+}
+
+.app-header h1 {
+  font-size: 3.2em;
+  line-height: 1.1;
+  margin-bottom: 0.5rem;
+}
+
+.app-header p {
+  margin: 0.5rem 0;
+  font-size: 1.1em;
+  color: #666;
+}
+
+.tech-stack {
+  font-size: 0.9em !important;
+  color: #999 !important;
+}
+
+.app-main {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.section {
+  width: 100%;
+}
+
+.card {
+  padding: 2em;
+  background-color: #f9f9f9;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.card h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+.counter-display {
+  margin-bottom: 1.5rem;
+}
+
+.counter-display h2 {
+  font-size: 2.5em;
+  margin: 0;
+  color: #646cff;
+}
+
+.button-group {
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  margin-bottom: 1rem;
+}
+
+button {
+  border-radius: 8px;
+  border: 1px solid transparent;
+  padding: 0.6em 1.2em;
+  font-size: 1em;
+  font-weight: 500;
+  font-family: inherit;
+  background-color: #1a1a1a;
+  color: white;
+  cursor: pointer;
+  transition: all 0.25s;
+}
+
+button:hover {
+  border-color: #646cff;
+  transform: translateY(-2px);
+}
+
+button:active {
+  transform: translateY(0);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 4px auto -webkit-focus-ring-color;
+}
+
+.info {
+  color: #888;
+}
+
+.demo-note {
+  margin-top: 1rem;
+  font-size: 0.9em;
+  color: #666;
+}
+
+.app-footer {
+  text-align: center;
+  padding: 2rem 0;
+  margin-top: 3rem;
+  border-top: 1px solid #e0e0e0;
+  color: #666;
+}
+
+.app-footer p {
+  margin: 0;
+}
+
+@media (prefers-color-scheme: dark) {
+  .app-header {
+    border-bottom-color: #444;
+  }
+
+  .app-header p {
+    color: #aaa;
+  }
+
+  .tech-stack {
+    color: #777 !important;
+  }
+
+  .card h3 {
+    color: #fff;
+  }
+
+  .demo-note {
+    color: #aaa;
+  }
+
+  .app-footer {
+    border-top-color: #444;
+    color: #aaa;
+  }
+}
+
+code {
+  background-color: #f4f4f4;
+  padding: 0.2em 0.4em;
+  border-radius: 3px;
+  font-family: 'Courier New', monospace;
+}
+
+@media (prefers-color-scheme: dark) {
+  .card {
+    background-color: #242424;
+  }
+  
+  code {
+    background-color: #1a1a1a;
+  }
+}
