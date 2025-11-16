@@ -75,6 +75,28 @@ export function SpiderList() {
   const [editError, setEditError] = useState<string | null>(null)
   const [healthData, setHealthData] = useState<HealthCheck | null>(null)
 
+  const defaultSpiderTemplate = `from typing import Dict, Any
+from ..core.base_spider import BaseSpider
+
+
+class DefaultSpider(BaseSpider):
+    name = "default"
+    
+    def parse(self, raw_content: str, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+        """
+        Parse web page content and extract basic information
+        
+        Args:
+            raw_content: original HTML/text content
+            url: requested URL
+            headers: response header information
+            
+        Returns:
+            extracted data dictionary
+        """
+        return raw_content
+`
+
   // Color mode values
   const bgColor = useColorModeValue('white', 'gray.800')
   const borderColor = useColorModeValue('gray.200', 'gray.600')
@@ -114,6 +136,13 @@ export function SpiderList() {
       setCurrentDebugResult(result)
       setShowDebugResult(true)
     }
+  }
+
+  const openCreateModal = () => {
+    setSpiderName('')
+    setSpiderCode(defaultSpiderTemplate)
+    setCreateError(null)
+    setShowCreateModal(true)
   }
 
   const handleCreateSpider = async () => {
@@ -281,7 +310,7 @@ export function SpiderList() {
               <Button
                 leftIcon={<AddIcon />}
                 colorScheme="brand"
-                onClick={() => setShowCreateModal(true)}
+                onClick={openCreateModal}
               >
                 {t('createSpider')}
               </Button>
