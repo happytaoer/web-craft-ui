@@ -76,7 +76,7 @@ export function SpiderList() {
   const [healthData, setHealthData] = useState<HealthCheck | null>(null)
 
   const defaultSpiderTemplate = `from typing import Dict, Any
-from ..core.base_spider import BaseSpider
+from spiders.core.base_spider import BaseSpider
 
 
 class DefaultSpider(BaseSpider):
