@@ -95,11 +95,11 @@ export const useSpiderStore = create<SpiderState>((set, get) => ({
 
       if (response.success) {
         set({ lastDebugResult: response.data })
-        return response.data
       } else {
         set({ error: response.message })
-        return null
       }
+
+      return response.data ?? null
     } catch (error) {
       set({ 
         error: error instanceof Error ? error.message : 'Debug 执行失败'

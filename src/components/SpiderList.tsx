@@ -314,13 +314,13 @@ export function SpiderList() {
 
       {/* Main Content */}
       <Container maxW="container.xl" py={8}>
-        {error && (
+        {/* {error && (
           <Alert status="error" mb={6} borderRadius="md">
             <AlertIcon />
             <AlertTitle>{t('errorTitle')}</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
-        )}
+        )} */}
 
         <Grid
           templateColumns={{
