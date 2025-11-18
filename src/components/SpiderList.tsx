@@ -81,7 +81,7 @@ from spiders.core.base_spider import BaseSpider
 
 class DefaultSpider(BaseSpider):
     name = "default"
-    
+    start_url = "https://www.google.com"
     def parse(self, raw_content: str, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
         """
         Parse web page content and extract basic information
