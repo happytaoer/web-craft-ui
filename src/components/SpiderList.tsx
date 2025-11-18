@@ -76,20 +76,19 @@ export function SpiderList() {
   const [healthData, setHealthData] = useState<HealthCheck | null>(null)
 
   const defaultSpiderTemplate = `from typing import Dict, Any
-from spiders.core.base_spider import BaseSpider
+from spiders.core.base_spider import BaseSpider, ParseContext
 
 
 class DefaultSpider(BaseSpider):
     name = "default"
     start_url = "https://www.google.com"
-    def parse(self, raw_content: str, url: str, headers: Dict[str, str]) -> Dict[str, Any]:
+    def parse(self, raw_content: str, context: ParseContext) -> Dict[str, Any]:
         """
         Parse web page content and extract basic information
         
         Args:
             raw_content: original HTML/text content
-            url: requested URL
-            headers: response header information
+            context: request/response metadata
             
         Returns:
             extracted data dictionary
