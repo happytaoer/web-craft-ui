@@ -65,6 +65,15 @@ export const translations = {
     emptyCode: '爬虫代码不能为空',
     unknownError: '未知错误',
     
+    // Validation Errors
+    validationErrorTitle: '代码验证失败',
+    validationErrorDesc: '您的爬虫代码存在以下问题：',
+    syntaxError: '语法错误',
+    importError: '导入错误',
+    structureError: '结构错误',
+    fieldError: '字段错误',
+    errorAtLine: '第 {line} 行',
+    
     // Loading
     loading: '加载中...',
     
@@ -148,6 +157,15 @@ export const translations = {
     emptyNameOrCode: 'Spider name and code cannot be empty',
     emptyCode: 'Spider code cannot be empty',
     unknownError: 'Unknown error',
+    
+    // Validation Errors
+    validationErrorTitle: 'Code Validation Failed',
+    validationErrorDesc: 'Your spider code has the following issues:',
+    syntaxError: 'Syntax Error',
+    importError: 'Import Error',
+    structureError: 'Structure Error',
+    fieldError: 'Field Error',
+    errorAtLine: 'Line {line}',
     
     // Loading
     loading: 'Loading...',

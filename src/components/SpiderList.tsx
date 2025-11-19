@@ -14,13 +14,8 @@ import {
   Card,
   CardHeader,
   CardBody,
-  CardFooter,
   Stack,
   Spinner,
-  Alert,
-  AlertIcon,
-  AlertTitle,
-  AlertDescription,
   Modal,
   ModalOverlay,
   ModalContent,
@@ -43,7 +38,8 @@ import { MoonIcon, SunIcon, AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/ico
 import { FaPlay, FaBug, FaGlobe } from 'react-icons/fa'
 import { useSpiderStore } from '../store'
 import { spiderApi } from '../services/api'
-import type { CrawlResult, HealthCheck } from '../types/api'
+import type { CrawlResult, HealthCheck, ValidationError, ValidationErrorResponse } from '../types/api'
+import { ValidationErrorDisplay } from './ValidationErrorDisplay'
 import Editor from 'react-simple-code-editor'
 import { highlight, languages } from 'prismjs'
 import 'prismjs/components/prism-python'
@@ -53,7 +49,7 @@ import { useLanguage } from '../i18n/LanguageContext.tsx'
 export function SpiderList() {
   const { colorMode, toggleColorMode } = useColorMode()
   const { language, setLanguage, t } = useLanguage()
-  const { spiders, loading, error, executingSpiders, debuggingSpiders, fetchSpiders, executeSpider, debugSpider } = useSpiderStore()
+  const { spiders, loading, executingSpiders, debuggingSpiders, fetchSpiders, executeSpider, debugSpider } = useSpiderStore()
   const toast = useToast()
   
   // State
@@ -66,6 +62,7 @@ export function SpiderList() {
   const [spiderCode, setSpiderCode] = useState('')
   const [creating, setCreating] = useState(false)
   const [createError, setCreateError] = useState<string | null>(null)
+  const [createValidationErrors, setCreateValidationErrors] = useState<ValidationError[]>([])
   const [deletingSpiders, setDeletingSpiders] = useState<Set<string>>(new Set())
   const [showEditModal, setShowEditModal] = useState(false)
   const [editingSpiderId, setEditingSpiderId] = useState<string | null>(null)
@@ -73,6 +70,7 @@ export function SpiderList() {
   const [loadingCode, setLoadingCode] = useState(false)
   const [editing, setEditing] = useState(false)
   const [editError, setEditError] = useState<string | null>(null)
+  const [editValidationErrors, setEditValidationErrors] = useState<ValidationError[]>([])
   const [healthData, setHealthData] = useState<HealthCheck | null>(null)
 
   const defaultSpiderTemplate = `from typing import Dict, Any
@@ -152,6 +150,7 @@ class DefaultSpider(BaseSpider):
 
     setCreating(true)
     setCreateError(null)
+    setCreateValidationErrors([])
 
     try {
       const response = await spiderApi.createSpider({
@@ -172,7 +171,17 @@ class DefaultSpider(BaseSpider):
         setSpiderCode('')
         await fetchSpiders()
       } else {
-        setCreateError(`${t('createFailed')}: ${response.message}`)
+        // Check if this is a validation error
+        if (response.error_code === 'VALIDATION_ERROR' && response.data) {
+          const validationData = response.data as unknown as ValidationErrorResponse
+          if (validationData.validation_errors) {
+            setCreateValidationErrors(validationData.validation_errors)
+          } else {
+            setCreateError(`${t('createFailed')}: ${response.message}`)
+          }
+        } else {
+          setCreateError(`${t('createFailed')}: ${response.message}`)
+        }
       }
     } catch (error) {
       setCreateError(`${t('createFailed')}: ${error instanceof Error ? error.message : t('unknownError')}`)
@@ -257,6 +266,7 @@ class DefaultSpider(BaseSpider):
 
     setEditing(true)
     setEditError(null)
+    setEditValidationErrors([])
 
     try {
       const response = await spiderApi.editSpider(editingSpiderId, {
@@ -277,7 +287,17 @@ class DefaultSpider(BaseSpider):
         setEditSpiderCode('')
         await fetchSpiders()
       } else {
-        setEditError(`${t('saveFailed')}: ${response.message}`)
+        // Check if this is a validation error
+        if (response.error_code === 'VALIDATION_ERROR' && response.data) {
+          const validationData = response.data as unknown as ValidationErrorResponse
+          if (validationData.validation_errors) {
+            setEditValidationErrors(validationData.validation_errors)
+          } else {
+            setEditError(`${t('saveFailed')}: ${response.message}`)
+          }
+        } else {
+          setEditError(`${t('saveFailed')}: ${response.message}`)
+        }
       }
     } catch (error) {
       setEditError(`${t('saveFailed')}: ${error instanceof Error ? error.message : t('unknownError')}`)
@@ -478,6 +498,11 @@ class DefaultSpider(BaseSpider):
                 </Box>
                 {createError && <FormErrorMessage>{createError}</FormErrorMessage>}
               </FormControl>
+              
+              {/* Validation Errors Display */}
+              {createValidationErrors.length > 0 && (
+                <ValidationErrorDisplay errors={createValidationErrors} />
+              )}
             </Stack>
           </ModalBody>
 
@@ -490,6 +515,7 @@ class DefaultSpider(BaseSpider):
                 setSpiderName('')
                 setSpiderCode('')
                 setCreateError(null)
+                setCreateValidationErrors([])
               }}
               disabled={creating}
             >
@@ -528,34 +554,41 @@ class DefaultSpider(BaseSpider):
                 <Spinner size="xl" color="brand.500" />
               </Flex>
             ) : (
-              <FormControl isInvalid={!!editError}>
-                <FormLabel>{t('spiderCode')}</FormLabel>
-                <Box
-                  border="1px"
-                  borderColor={borderColor}
-                  borderRadius="md"
-                  overflow="hidden"
-                  bg={editorBg}
-                >
-                  <Editor
-                    value={editSpiderCode}
-                    onValueChange={setEditSpiderCode}
-                    highlight={(code) => highlight(code, languages.python, 'python')}
-                    padding={16}
-                    disabled={editing}
-                    placeholder={t('spiderCodePlaceholder')}
-                    style={{
-                      fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
-                      fontSize: 14,
-                      lineHeight: 1.6,
-                      minHeight: '500px',
-                      maxHeight: '60vh',
-                      overflow: 'auto',
-                    }}
-                  />
-                </Box>
-                {editError && <FormErrorMessage>{editError}</FormErrorMessage>}
-              </FormControl>
+              <Stack spacing={4}>
+                <FormControl isInvalid={!!editError}>
+                  <FormLabel>{t('spiderCode')}</FormLabel>
+                  <Box
+                    border="1px"
+                    borderColor={borderColor}
+                    borderRadius="md"
+                    overflow="hidden"
+                    bg={editorBg}
+                  >
+                    <Editor
+                      value={editSpiderCode}
+                      onValueChange={setEditSpiderCode}
+                      highlight={(code) => highlight(code, languages.python, 'python')}
+                      padding={16}
+                      disabled={editing}
+                      placeholder={t('spiderCodePlaceholder')}
+                      style={{
+                        fontFamily: '"Consolas", "Monaco", "Courier New", monospace',
+                        fontSize: 14,
+                        lineHeight: 1.6,
+                        minHeight: '500px',
+                        maxHeight: '60vh',
+                        overflow: 'auto',
+                      }}
+                    />
+                  </Box>
+                  {editError && <FormErrorMessage>{editError}</FormErrorMessage>}
+                </FormControl>
+                
+                {/* Validation Errors Display */}
+                {editValidationErrors.length > 0 && (
+                  <ValidationErrorDisplay errors={editValidationErrors} />
+                )}
+              </Stack>
             )}
           </ModalBody>
 
@@ -568,6 +601,7 @@ class DefaultSpider(BaseSpider):
                 setEditingSpiderId(null)
                 setEditSpiderCode('')
                 setEditError(null)
+                setEditValidationErrors([])
               }}
               disabled={editing}
             >
