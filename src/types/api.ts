@@ -88,3 +88,14 @@ export interface HealthCheck {
   uptime: number
   system_info: SystemInfo
 }
+
+export interface ValidationError {
+  type: 'syntax_error' | 'import_error' | 'structure_error' | 'field_error'
+  message: string
+  line?: number
+  detail?: string
+}
+
+export interface ValidationErrorResponse {
+  validation_errors: ValidationError[]
+}
