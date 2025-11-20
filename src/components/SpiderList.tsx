@@ -15,6 +15,7 @@ import {
   CardHeader,
   CardBody,
   Stack,
+  HStack,
   Spinner,
   Modal,
   ModalOverlay,
@@ -35,11 +36,14 @@ import {
   MenuItem,
 } from '@chakra-ui/react'
 import { MoonIcon, SunIcon, AddIcon, DeleteIcon, EditIcon } from '@chakra-ui/icons'
-import { FaPlay, FaBug, FaGlobe } from 'react-icons/fa'
+import { FaPlay, FaBug, FaGlobe, FaRobot } from 'react-icons/fa'
 import { useSpiderStore } from '../store'
 import { spiderApi } from '../services/api'
 import type { CrawlResult, HealthCheck, ValidationError, ValidationErrorResponse } from '../types/api'
 import { ValidationErrorDisplay } from './ValidationErrorDisplay'
+import { AISpiderWizard } from './AISpiderWizard'
+import { AIChatPanel } from './AIChatPanel'
+import { urlPreviewService } from '../services/urlPreviewService'
 import Editor from 'react-simple-code-editor'
 import { highlight, languages } from 'prismjs'
 import 'prismjs/components/prism-python'
@@ -72,6 +76,14 @@ export function SpiderList() {
   const [editError, setEditError] = useState<string | null>(null)
   const [editValidationErrors, setEditValidationErrors] = useState<ValidationError[]>([])
   const [healthData, setHealthData] = useState<HealthCheck | null>(null)
+  const [showAIWizard, setShowAIWizard] = useState(false)
+  const [showEditAIChat, setShowEditAIChat] = useState(false)
+  const [editHtmlContext, setEditHtmlContext] = useState<{
+    url: string
+    htmlContent: string
+    title: string
+  } | undefined>(undefined)
+  const [fetchingPageForEdit, setFetchingPageForEdit] = useState(false)
 
   const defaultSpiderTemplate = `from typing import Dict, Any
 from spiders.core.base_spider import BaseSpider, ParseContext
@@ -140,6 +152,79 @@ class DefaultSpider(BaseSpider):
     setSpiderCode(defaultSpiderTemplate)
     setCreateError(null)
     setShowCreateModal(true)
+  }
+
+  const handleAIWizardComplete = (code: string, spiderName: string) => {
+    setSpiderName(spiderName)
+    setSpiderCode(code)
+    setShowCreateModal(true)
+    setShowAIWizard(false)
+  }
+
+  const handleEditAIApplyCode = (code: string) => {
+    setEditSpiderCode(code)
+    setShowEditAIChat(false)
+  }
+
+  const handleOpenEditAI = async () => {
+    // Extract start_url from existing code
+    const urlMatch = editSpiderCode.match(/start_url\s*=\s*["'](.+?)["']/)
+    
+    if (urlMatch && urlMatch[1]) {
+      const targetUrl = urlMatch[1]
+      
+      toast({
+        title: t('fetchingTargetContent'),
+        status: 'info',
+        duration: 2000,
+      })
+      
+      // Fetch target website HTML
+      setFetchingPageForEdit(true)
+      try {
+        const preview = await urlPreviewService.fetchPageContent(targetUrl)
+        setFetchingPageForEdit(false)
+        
+        if (preview.success) {
+          setEditHtmlContext({
+            url: preview.url,
+            htmlContent: preview.htmlContent,
+            title: preview.title
+          })
+          
+          toast({
+            title: t('contentFetchSuccess'),
+            status: 'success',
+            duration: 2000,
+          })
+        } else {
+          toast({
+            title: t('contentFetchFailed'),
+            description: preview.errorMessage,
+            status: 'warning',
+            duration: 3000,
+          })
+          // Even if fetch fails, can still use AI (just without HTML context)
+        }
+      } catch (error) {
+        setFetchingPageForEdit(false)
+        toast({
+          title: t('contentFetchFailed'),
+          description: error instanceof Error ? error.message : t('unknownError'),
+          status: 'error',
+          duration: 3000,
+        })
+      }
+    } else {
+      toast({
+        title: t('cannotExtractUrl'),
+        description: t('ensureStartUrl'),
+        status: 'warning',
+        duration: 3000,
+      })
+    }
+    
+    setShowEditAIChat(true)
   }
 
   const handleCreateSpider = async () => {
@@ -332,6 +417,13 @@ class DefaultSpider(BaseSpider):
                 onClick={openCreateModal}
               >
                 {t('createSpider')}
+              </Button>
+              <Button
+                leftIcon={<FaRobot />}
+                colorScheme="purple"
+                onClick={() => setShowAIWizard(true)}
+              >
+                {t('aiSpiderWizardTitle')}
               </Button>
               <Menu>
                 <MenuButton
@@ -556,7 +648,20 @@ class DefaultSpider(BaseSpider):
             ) : (
               <Stack spacing={4}>
                 <FormControl isInvalid={!!editError}>
-                  <FormLabel>{t('spiderCode')}</FormLabel>
+                  <HStack justify="space-between" mb={2}>
+                    <FormLabel mb={0}>{t('spiderCode')}</FormLabel>
+                    <Button
+                      size="sm"
+                      leftIcon={<FaRobot />}
+                      onClick={handleOpenEditAI}
+                      variant="outline"
+                      colorScheme="purple"
+                      isLoading={fetchingPageForEdit}
+                      loadingText="获取页面中..."
+                    >
+                      {t('aiOptimize')}
+                    </Button>
+                  </HStack>
                   <Box
                     border="1px"
                     borderColor={borderColor}
@@ -848,6 +953,26 @@ class DefaultSpider(BaseSpider):
           </Container>
         </Box>
       )}
+
+      {/* AI Spider Wizard */}
+      <AISpiderWizard
+        isOpen={showAIWizard}
+        onClose={() => setShowAIWizard(false)}
+        onComplete={handleAIWizardComplete}
+      />
+
+      {/* AI Chat Panel for Edit */}
+      <AIChatPanel
+        isOpen={showEditAIChat}
+        onClose={() => {
+          setShowEditAIChat(false)
+          setEditHtmlContext(undefined)
+        }}
+        onApplyCode={handleEditAIApplyCode}
+        existingCode={editSpiderCode}
+        htmlContext={editHtmlContext}
+        mode="edit"
+      />
     </Box>
   )
 }
