@@ -2,6 +2,8 @@
  * URL Preview Service - Fetch HTML content from target webpage
  */
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://127.0.0.1:8080/api/v1'
+
 export interface PagePreview {
   url: string
   statusCode: number
@@ -21,7 +23,7 @@ class URLPreviewService {
   async fetchPageContent(url: string): Promise<PagePreview> {
     try {
       // Call backend API to fetch page content
-      const apiUrl = `http://0.0.0.0:8080/api/v1/fetch-url?url=${encodeURIComponent(url)}`
+      const apiUrl = `${API_BASE_URL}/fetch-url?url=${encodeURIComponent(url)}`
       
       const response = await fetch(apiUrl, {
         method: 'GET',
